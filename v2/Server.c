@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include <sched.h>
 
 //int index = 0;
 
@@ -11,13 +10,14 @@ void    handle_sigusr1(int sig)
     //bits[index] = '1';
     //index++;
     printf("1");
+    write(1, "1", 1);
 }
 
 void    handle_sigusr2(int sig)
 {
     //bits[index] = '0';
     //index++;
-    printf("0");
+    write(1, "0", 1);
 }
 
 int main(void)
@@ -26,7 +26,7 @@ int main(void)
 
     sa.sa_handler = handle_sigusr1;
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_RESTART;
     if (sigaction(SIGUSR1, &sa, NULL) == -1) {
         perror("sigaction");
         return 1;
@@ -38,14 +38,12 @@ int main(void)
         return 1;
     }
 
+
     pid_t pid;
     //char bits[1024];
-
     pid = getpid();
     printf("PID: %d\n", pid);
-    while(1)
-    {
+    while (1)
         pause();
-    }
     return 0;
 }

@@ -3,26 +3,31 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include "./ft_printf/ft_printf.h"
 
-void string_to_bits(const char *str, char *bits) {
+void string_to_bits(const char *str, int pid) {
     int i = 0;
     while (str[i] != '\0') {
         char ch = str[i];
         int j = 7;
         while (j >= 0) {
             if ((ch >> j) & 1) {
-                bits[i * 8 + (7 - j)] = '1';
+                kill(pid, SIGUSR1);
             } else {
-                bits[i * 8 + (7 - j)] = '0';
+                kill(pid, SIGUSR2);
             }
             j--;
+            usleep(1000);
         }
         i++;
     }
-    bits[i * 8] = '\0';
+/*     kill(pid, SIGUSR1);
+    kill(pid, SIGUSR2);
+    kill(pid, SIGUSR1);
+    kill(pid, SIGUSR2); */
 }
 
-void sendbits(pid_t pid, const char *bits)
+/* void sendbits(pid_t pid, const char *bits)
 {
     int i;
     int erro;
@@ -34,26 +39,20 @@ void sendbits(pid_t pid, const char *bits)
             erro = kill(pid, SIGUSR1);
         else
             erro = kill(pid, SIGUSR2);
-
-        if (erro == -1)
-            printf("erro");
-        i++;
-        usleep(1000);
-    }
-    printf("Sinal enviado!");
+    //printf("Sinal enviado!");
     return ;
-}
+} */
 
 void handle_sigusr1(int sig) {
-    printf("1");
+    ft_printf("Erro");
 }
 
 void handle_sigusr2(int sig) {
-    printf("0");
+    ft_printf("Mensagem recebida");
 }
 
 int main(int ac, char **av) {
-/*     struct sigaction sa;
+    struct sigaction sa;
 
     sa.sa_handler = handle_sigusr1;
     sigemptyset(&sa.sa_mask);
@@ -62,15 +61,14 @@ int main(int ac, char **av) {
 
     sa.sa_handler = handle_sigusr2;
     sigaction(SIGUSR2, &sa, NULL);
-     */
-    (void)ac;
-    pid_t pid;
-    char bits[8 * (strlen(av[2]) + 1)];
+    
+    if (ac != 3)
+        ft_printf("Numero de argumetos insuficiente!\n./Client <PID> <Mensagem>");
+    int pid;
     pid = atoi(av[1]);
-    printf("PID: %d\n", pid);
-    string_to_bits(av[2], bits);
-    printf("%s\n", bits);
-    sendbits(pid, bits);
+    //ft_printf("PID: %d\n", pid);
+    string_to_bits(av[2], pid);
+//    sendbits(pid, bits);
 
     return 0;
 }

@@ -7,6 +7,7 @@
 
 void string_to_bits(const char *str, int pid) {
     int i = 0;
+    int j = 0;
     while (str[i] != '\0') {
         char ch = str[i];
         int j = 7;
@@ -21,10 +22,19 @@ void string_to_bits(const char *str, int pid) {
         }
         i++;
     }
-/*     kill(pid, SIGUSR1);
-    kill(pid, SIGUSR2);
-    kill(pid, SIGUSR1);
-    kill(pid, SIGUSR2); */
+    while (j < 4)
+    {
+        kill(pid, SIGUSR2);
+        usleep(1000);
+        j++;
+    }
+        while (j > 2)
+    {
+        kill(pid, SIGUSR1);
+        usleep(1000);
+        kill(pid, SIGUSR2);
+        j--;
+    }
 }
 
 /* void sendbits(pid_t pid, const char *bits)

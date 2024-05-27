@@ -32,7 +32,6 @@ void    handle_sigusr(int signum, siginfo_t *info, void *context)
         ft_printf("%c", c);
         c = 0;
     }
-    //kill(pid, SIGUSR2);
 }
 
 int main(void)

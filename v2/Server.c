@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmelo-ca <dmelo-ca@student.42.fr>          +#+  +:+       +#+        */
+/*   By: davi <davi@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 17:58:15 by dmelo-ca          #+#    #+#             */
-/*   Updated: 2024/05/28 18:17:24 by dmelo-ca         ###   ########.fr       */
+/*   Updated: 2024/06/14 10:27:22 by davi             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,26 +23,61 @@ void	bin_to_char(int signum, char *c)
 	else if (signum == SIGUSR2)
 		*c <<= 1;
 }
+char	*stringmalloc(int signum)
+{
+	static int	bit_index;
+	static char *result;
+	static int	size;
+
+	if (bit_index < 7)
+	{
+		if (signum == SIGUSR1)
+			size = (size << 1) | 1;
+		else if (signum == SIGUSR2)
+			size <<= 1;
+		bit_index++;
+		return (NULL);
+	}
+	if (bit_index == 7)
+		result = (char *)malloc((size + 1) * sizeof(char));
+	return (result);
+}
 
 void	handle_sigusr(int signum, siginfo_t *info, void *context)
 {
 	static int	pid;
 	static int	bit_index;
 	static char	c;
+	static int	i;
+	static char	*string;
 
-	pid = info->si_pid;
-	bin_to_char(signum, &c);
-	if (++bit_index == 8)
+	//pid = info->si_pid;
+	if (string == NULL)
 	{
-		bit_index = 0;
-		if (!c)
+		string = stringmalloc(signum);
+	}
+	else if (string != NULL)
+	{
+		bin_to_char(signum, &c);
+		if (++bit_index == 8)
 		{
-			kill(pid, SIGUSR1);
-			pid = 0;
-			return ;
+			bit_index = 0;
+			if (!c)
+			{
+				kill(pid, SIGUSR1);
+				pid = 0;
+				return ;
+			}
+			string[i++] = c;
+			if (string[i] == '\0')
+			{
+				ft_printf("%s", string);
+				free(string);
+				string = NULL;
+			}
+			//ft_printf("%c", c);
+			c = 0;
 		}
-		ft_printf("%c", c);
-		c = 0;
 	}
 }
 
